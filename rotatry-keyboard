@@ -1,0 +1,109 @@
+#!/bin/bash
+
+shift=0
+alphabet=(a b c d e f g h i j k l m n o p q r s t u v w x y z)
+small_alphabet=(a b c d e f g h i j k l m n o p q r s t u v w x y z)
+big_alphabet=(A B C D E F G H I J K L M N O P Q R S T U V W X Y Z)
+letter=0
+rot=0
+counter=0
+block=0
+
+function left_button() {
+  if [ $shift -eq 1 ]; then
+    xdotool key$1 Delete
+  else
+    xdotool key$1 enter
+  fi
+}
+
+function right_button() {
+  if [ $shift -eq 1 ]; then
+    xdotool key$1 BackSpace
+  else
+    xdotool key$1 space
+  fi
+}
+
+function accept_letter {
+  if [ $counter -eq 1 ] && [ $block -eq 0 ]; then 
+    echo "shift mode ON"
+    shift=$((1))
+  fi
+  if [ $shift -eq 1 ] && [ $counter -gt 2 ]; then
+    echo "shift mode OFF"
+    shift=$((0))
+    block=$((0))
+    counter=$((0))
+  fi
+  letter=$((0))
+  rot=$((0))
+  counter=$((counter+1))
+}
+
+function print_letter {
+  if [ $shift -eq 1 ]; then
+    xdotool key Right
+  else
+    counter=$((0))
+    if [ $letter -eq 0 ]; then
+      if [ $rot -eq 1 ]; then 
+        xdotool key BackSpace
+      fi
+      xdotool keydown ${alphabet[$letter]} keyup ${alphabet[$letter]}
+      letter=$((letter+1))
+    elif [ $letter -eq 25 ]; then
+      xdotool key BackSpace
+      xdotool keydown ${alphabet[$letter]} keyup ${alphabet[$letter]}
+      letter=$((0))
+      rot=$((1))
+    else
+      xdotool key BackSpace
+      xdotool keydown ${alphabet[$letter]} keyup ${alphabet[$letter]}
+      letter=$((letter+1))
+    fi
+  fi
+}
+
+function print_letter_back {
+  if [ $shift -eq 1 ]; then
+    xdotool key Left
+  else
+    counter=$((0))
+    if [ $letter -eq 0 ]; then
+      if [ $rot -eq 1 ]; then 
+        xdotool key BackSpace
+        xdotool keydown ${alphabet[$letter]} keyup ${alphabet[$letter]}
+        letter=$((25))
+        return
+      fi
+      letter=$((25))
+      xdotool keydown ${alphabet[$letter]} keyup ${alphabet[$letter]}
+      letter=$((letter-1))
+    elif [ $letter -eq 1 ]; then
+      xdotool key BackSpace
+      xdotool keydown ${alphabet[$letter]} keyup ${alphabet[$letter]}
+      letter=$((0))
+      rot=$((1))
+    else
+      xdotool key BackSpace
+      xdotool keydown ${alphabet[$letter]} keyup ${alphabet[$letter]}
+      letter=$((letter-1))
+    fi
+  fi
+}
+
+aseqdump -p "DJ2GO2" | \
+while IFS=" ," read src ev1 ev2 ch label1 data1 label2 data2 rest; do
+    case "$ev1 $ev2 $ch $data1 $data2" in    
+        "Note on 15 6 127" ) accept_letter ;;
+
+        "Control change 15 0 1" ) print_letter ;;
+        "Control change 15 0 127" ) print_letter_back;;
+
+        "Note on 15 2 127" ) left_button down ;;
+        "Note off 15 2 0" ) left_button up ;;
+        "Note on 15 3 127" ) right_button down ;;
+        "Note off 15 3 0" ) right_button up ;;
+    esac
+done

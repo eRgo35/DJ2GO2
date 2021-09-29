@@ -1,0 +1,122 @@
+#!/bin/bash
+aseqdump -p "DJ2GO2" | \
+while IFS=" ," read src ev1 ev2 ch label1 data1 label2 data2 rest; do
+    case "$ev1 $ev2 $ch $data1 $data2" in       
+        #? Pad Mode Button
+        "Note on 4 0 5" ) echo "Auto Mode" ;;
+        "Note on 4 0 11" ) echo "Manual Mode" ;;
+        "Note on 4 0 7" ) echo "Sampler Mode" ;;
+        "Note off 4 0 0" ) echo "Cues Mode" ;;
+
+        #? Cues Section
+        "Note on 4 1 127" ) xdotool keydown w ;;
+        "Note on 4 2 127" ) xdotool keydown s ;;
+        "Note on 4 3 127" ) xdotool keydown a ;;
+        "Note on 4 4 127" ) xdotool keydown d ;;
+
+        "Note off 4 1 0" ) xdotool keyup w ;;
+        "Note off 4 2 0" ) xdotool keyup s ;;
+        "Note off 4 3 0" ) xdotool keyup a ;;
+        "Note off 4 4 0" ) xdotool keyup d ;;
+
+        "Note on 5 1 127" ) xdotool mousedown 1;;
+        "Note on 5 2 127" ) xdotool mousedown 3;;
+        "Note on 5 3 127" ) xdotool keydown e ;;
+        "Note on 5 4 127" ) xdotool keydown z ;;
+
+        "Note off 5 1 0" ) xdotool mouseup 1;;
+        "Note off 5 2 0" ) xdotool mouseup 3;;
+        "Note off 5 3 0" ) xdotool keyup e ;;
+        "Note off 5 4 0" ) xdotool keyup x  ;;
+
+        #? Auto Section
+        "Note on 4 17 127" ) xdotool key F28 ;;
+        "Note on 4 18 127" ) xdotool key F29 ;;
+        "Note on 4 19 127" ) xdotool key F30 ;;
+        "Note on 4 20 127" ) xdotool key F31 ;;
+
+        "Note on 5 17 127" ) xdotool key F32 ;;
+        "Note on 5 18 127" ) xdotool key F33 ;;
+        "Note on 5 19 127" ) xdotool key F34 ;;
+        "Note on 5 20 127" ) xdotool key F35 ;;
+
+        #? Manual Section
+        "Note on 4 33 127" ) xdotool keydown Alt + key F20 + keyup Alt;;
+        "Note on 4 34 127" ) xdotool keydown Alt + key F21 + keyup Alt;;
+        "Note on 4 35 127" ) xdotool keydown Alt + key F22 + keyup Alt;;
+        "Note on 4 36 127" ) xdotool keydown Alt + key F23 + keyup Alt;;
+
+        "Note on 5 33 127" ) xdotool keydown Alt + key F24 + keyup Alt ;;
+        "Note on 5 34 127" ) xdotool keydown Alt + key F25 + keyup Alt ;;
+        "Note on 5 35 127" ) xdotool keydown Alt + key F26 + keyup Alt ;;
+        "Note on 5 36 127" ) xdotool keydown Alt + key F27 + keyup Alt ;;
+
+        #? Sampler Section
+        "Note on 4 49 127" ) xdotool keydown Alt + key F28 + keyup Alt ;;
+        "Note on 4 50 127" ) xdotool keydown Alt + key F29 + keyup Alt ;;
+        "Note on 4 51 127" ) xdotool keydown Alt + key F30 + keyup Alt ;;
+        "Note on 4 52 127" ) xdotool keydown Alt + key F31 + keyup Alt ;;
+
+        "Note on 5 49 127" ) xdotool keydown Alt + key F32 + keyup Alt ;;
+        "Note on 5 50 127" ) xdotool keydown Alt + key F33 + keyup Alt ;;
+        "Note on 5 51 127" ) xdotool keydown Alt + key F34 + keyup Alt ;;
+        "Note on 5 52 127" ) xdotool keydown Alt + key F35 + keyup Alt ;;
+
+        #? Headphones Buttons
+        "Note on 0 27 127" ) echo "LHeadphones ON" ;;
+        "Note off 0 27 0" ) echo "LHeadphones OFF" ;;
+        
+        "Note on 1 27 127" ) echo "RHeadphones ON" ;;
+        "Note off 1 27 0" ) echo "RHeadphones OFF" ;;
+
+        #? Left Player
+        "Note on 0 0 127" ) xdotool keydown space ;;
+        "Note off 0 0 0" ) xdotool keyup space ;;
+        "Note on 0 1 127" ) echo "LCue" ;;
+        "Note on 0 2 127" ) echo "LSync" ;;
+
+        #? Right Player
+        "Note on 1 0 127" ) echo "RPausePlay" ;;
+        "Note on 1 1 127" ) echo "RCue" ;;
+        "Note on 1 2 127" ) echo "RSync" ;;
+
+        #? Load Buttons
+        "Note on 15 2 127" ) echo "Load 1" ;;
+        "Note on 15 3 127" ) echo "Load 2" ;;
+
+        #? Left Jog wheel
+        "Control change 0 6 1" ) xdotool mousemove_relative --sync 20 0 ;;
+        "Control change 0 6 127" ) xdotool mousemove_relative --sync -- -20 0 ;;
+
+        #? Right Jog Wheel
+        "Control change 1 6 1" ) xdotool mousemove_relative --sync 0 20 ;;
+        "Control change 1 6 127" ) xdotool mousemove_relative --sync -- 0 -20 ;;
+
+        #? Browse Button & Wheel
+        "Note on 15 6 127" ) xdotool keydown Escape ;;
+        "Note off 15 6 0" ) xdotool keyup Escape ;;
+
+        "Control change 15 0 1" ) xdotool click 5 ;;
+        "Control change 15 0 127" ) xdotool click 4 ;;
+        
+        #? Crossfader
+        "Control change 15 8 "* ) echo "Crossfader $data2" ;;
+
+        #? Master Level
+        "Control change 15 10 "* ) amixer set Master $(echo "scale=2;$data2/127*100" | bc)% ;;
+        # "Control change 15 10 "* ) amixer set Master $data2% ;; # Raw input if you want more than 100% volume (127% to be excact)
+
+        #? CH1 Level
+        "Control change 0 22 "* ) echo "CH1 Level $data2" ;;
+
+        #? CH2 Level
+        "Control change 1 22 "* ) echo "CH2 Level $data2" ;;
+
+        #? Cue Level
+        "Control change 15 12 "* ) echo "Cue Level $data2" ;;
+
+        #? Track Speed
+        "Control change 0 9 "* ) echo "LTrack Speed $data2" ;;
+        "Control change 1 9 "* ) echo "RTrack Speed $data2" ;;
+    esac
+done

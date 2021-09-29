@@ -150,8 +150,7 @@ while IFS=" ," read src ev1 ev2 ch label1 data1 label2 data2 rest; do
         "Control change 15 8 "* ) echo "Crossfader $data2" ;;
 
         #? Master Level
-        "Control change 15 10 "* ) amixer set Master $(echo "scale=2;$data2/127*100" | bc)% ;;
-        # "Control change 15 10 "* ) amixer set Master $data2% ;; # Raw input if you want more than 100% volume (127% to be excact)
+        "Control change 15 10 "* ) echo "Crossfader $data2" ;;
 
         #? CH1 Level
         "Control change 0 22 "* ) echo "CH1 Level $data2" ;;
